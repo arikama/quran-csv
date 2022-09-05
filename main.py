@@ -38,3 +38,5 @@ for surah_id, surah_sz in quran:
         row = '{},{},"{}"'.format(surah_id, verse_id, text)
 
         csv.write('{}\n'.format(row))
+
+        print('added: surah={}, verse={}'.format(surah_id, verse_id))
