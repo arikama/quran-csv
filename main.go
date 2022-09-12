@@ -7,12 +7,40 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hooligram/kifu"
 )
 
 func main() {
+	surahsCsv, err := os.Open("surahs.csv")
+	if err != nil {
+		kifu.Fatal(err.Error())
+	}
+
+	surahsReader := csv.NewReader(surahsCsv)
+	lines, err := surahsReader.ReadAll()
+	if err != nil {
+		kifu.Fatal(err.Error())
+	}
+
+	surahSzMap := map[int]int{}
+
+	for _, line := range lines {
+		surah_id, err := strconv.Atoi(line[0])
+		if err != nil {
+			kifu.Fatal(err.Error())
+		}
+
+		surah_sz, err := strconv.Atoi(line[1])
+		if err != nil {
+			kifu.Fatal(err.Error())
+		}
+
+		surahSzMap[surah_id] = surah_sz
+	}
+
 	file, err := os.Create("clearquran.csv")
 	if err != nil {
 		kifu.Fatal(err.Error())
@@ -22,8 +50,14 @@ func main() {
 	writer := csv.NewWriter(file)
 
 	for surah_id := 1; surah_id <= 114; surah_id++ {
-		kifu.Info("Scraping: surah_id=%v", surah_id)
 		lines := scrape(surah_id)
+		kifu.Info("Scraping: surah_id=%v", surah_id)
+
+		want := surahSzMap[surah_id]
+		actual := len(lines)
+		if actual != want {
+			kifu.Fatal("Surah size mismatch: surah_id=%v, want=%v, actual=%v", surah_id, want, actual)
+		}
 
 		for i, line := range lines {
 			verse_id := i + 1
