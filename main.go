@@ -22,10 +22,8 @@ func main() {
 	writer := csv.NewWriter(file)
 
 	for surah_id := 1; surah_id <= 114; surah_id++ {
-		url := fmt.Sprintf("https://www.clearquran.com/%03d.html", surah_id)
-
-		kifu.Info("Scraping: %v", url)
-		lines := scrape(url)
+		kifu.Info("Scraping: surah_id=%v", surah_id)
+		lines := scrape(surah_id)
 
 		for i, line := range lines {
 			verse_id := i + 1
@@ -37,7 +35,8 @@ func main() {
 	file.Close()
 }
 
-func scrape(url string) []string {
+func scrape(surah_id int) []string {
+	url := fmt.Sprintf("https://www.clearquran.com/%03d.html", surah_id)
 	response, err := http.Get(url)
 	if err != nil {
 		kifu.Fatal(err.Error())
@@ -63,7 +62,12 @@ func scrape(url string) []string {
 	verses := regexNum.Split(match, -1)
 	results := []string{}
 
-	for i := 1; i < len(verses); i++ {
+	i := 1
+	if surah_id == 1 || surah_id == 9 {
+		i = 0
+	}
+
+	for ; i < len(verses); i++ {
 		line := verses[i]
 		line = strings.ReplaceAll(line, "<p>", "")
 		line = strings.ReplaceAll(line, "</p>", "")
