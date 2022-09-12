@@ -81,12 +81,15 @@ func scrape(surah_id int) []string {
 		kifu.Fatal(err.Error())
 	}
 
-	regexVerses, err := regexp.Compile(`<p>[\n\w\.\s\/<>:,;!“”?—'’-]*<\/p>`)
+	text := string(chunks)
+	text = strings.ReplaceAll(text, "`", "'")
+
+	regexVerses, err := regexp.Compile(`<p>[\n\w\.\s\/<>:,;!“”?—'-‘’]*<\/p>`)
 	if err != nil {
 		kifu.Fatal(err.Error())
 	}
 
-	match := regexVerses.FindString(string(chunks))
+	match := regexVerses.FindString(text)
 
 	regexNum, err := regexp.Compile(`\d+\.`)
 	if err != nil {
